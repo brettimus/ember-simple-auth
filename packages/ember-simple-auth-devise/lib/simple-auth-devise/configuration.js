@@ -1,10 +1,11 @@
 import loadConfig from 'simple-auth/utils/load-config';
 
 var defaults = {
-  serverTokenEndpoint:         '/users/sign_in',
-  resourceName:                'user',
-  tokenAttributeName:          'token',
-  identificationAttributeName: 'user_email'
+  serverTokenEndpoint:                '/users/sign_in',
+  serverRegistrationEndpoint:         '/users',
+  resourceName:                       'user',
+  tokenAttributeName:                 'token',
+  identificationAttributeName:        'user_email'
 };
 
 /**
@@ -35,6 +36,18 @@ export default {
     @default '/users/sign_in'
   */
   serverTokenEndpoint: defaults.serverTokenEndpoint,
+
+  /**
+    The endpoint on the server the authenticator acquires the auth token
+    and email from.
+
+    @property serverRegistrationEndpoint
+    @readOnly
+    @static
+    @type String
+    @default '/users/sign_in'
+  */
+  serverRegistrationEndpoint: defaults.serverRegistrationEndpoint,
 
   /**
     The devise resource name.

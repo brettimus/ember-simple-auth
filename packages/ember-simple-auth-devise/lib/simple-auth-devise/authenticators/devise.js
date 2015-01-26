@@ -33,6 +33,18 @@ export default Base.extend({
   serverTokenEndpoint: '/users/sign_in',
 
   /**
+    The endpoint on the server the authenticator creates users from
+
+    This value can be configured via
+    [`SimpleAuth.Configuration.Devise#serverRegistrationEndpoint`](#SimpleAuth-Configuration-Devise-serverRegistrationEndpoint).
+
+    @property serverRegistrationEndpoint
+    @type String
+    @default '/users'
+  */
+  serverRegistrationEndpoint: '/users',
+
+  /**
     The devise resource name
 
     This value can be configured via
@@ -73,10 +85,11 @@ export default Base.extend({
     @private
   */
   init: function() {
-    this.serverTokenEndpoint          = Configuration.serverTokenEndpoint;
-    this.resourceName                 = Configuration.resourceName;
-    this.tokenAttributeName           = Configuration.tokenAttributeName;
-    this.identificationAttributeName  = Configuration.identificationAttributeName;
+    this.serverTokenEndpoint                 = Configuration.serverTokenEndpoint;
+    this.serverRegistrationEndpoint          = Configuration.serverRegistrationEndpoint;
+    this.resourceName                        = Configuration.resourceName;
+    this.tokenAttributeName                  = Configuration.tokenAttributeName;
+    this.identificationAttributeName         = Configuration.identificationAttributeName;
   },
 
   /**
@@ -142,6 +155,37 @@ export default Base.extend({
   */
   invalidate: function() {
     return Ember.RSVP.resolve();
+  },
+
+  /**
+    Registers user with service using the specified `credentials`;
+    the credentials are `POST`ed to the 
+    [`Authenticators.Devise#serverRegisterEndpoint`](#SimpleAuth-Authenticators-Devise-serverToken )
+
+    @method register
+    @param {Object} options The credentials to register the user with
+    @return {Ember.RSVP.Promise} A promise that resolves when a registration is succesfully submitted to the server and rejects otherwise
+  */
+  register: function(credentials) {
+    var _this = this;
+    return new Ember.RSVP.Promise(function(resolve, reject) {
+      var data = {};
+      data[_this.resourceName] = {
+        password: credentials.password,
+        password_confirmation: credentials.password_confirmation,
+      };
+      data[_this.resourceName][_this.identificationAttributeName] = credentials.identification;
+
+      _this.makeRequest(data).then(function(response){
+        Ember.run(function() {
+          resolve(response);
+        });
+      }, function(xhr, status, error) {
+        Ember.run(function() {
+          reject(xhr.responseJSON || xhr.responseText);
+        });
+      });
+    });
   },
 
   /**
